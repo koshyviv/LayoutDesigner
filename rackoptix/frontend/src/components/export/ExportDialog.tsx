@@ -48,9 +48,8 @@ const ExportDialog: React.FC<ExportDialogProps> = ({
   projectId,
   facilityId,
   layoutId,
-  data
-}: ExportDialogProps
-}) => {
+  data,
+}: ExportDialogProps) => {
   const { exportToFormat, isExporting } = useExport();
   
   const [format, setFormat] = useState<ExportOptions['format']>('pdf');
