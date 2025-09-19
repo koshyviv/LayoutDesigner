@@ -2,7 +2,7 @@
  * Product routes for the RackOptix API.
  */
 
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import multer from 'multer';
 import { body, param, query } from 'express-validator';
 import { validateRequest } from '../middleware/validation';
@@ -19,7 +19,7 @@ const upload = multer({
 });
 
 // GET /products - Get all products
-productRoutes.get('/', async (req, res, next) => {
+productRoutes.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const products = await productService.getAllProducts();
     res.json(products);
@@ -32,7 +32,7 @@ productRoutes.get('/', async (req, res, next) => {
 productRoutes.get('/:id', 
   param('id').isString().notEmpty(),
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const product = await productService.getProductById(req.params.id);
       if (!product) {
@@ -60,7 +60,7 @@ productRoutes.post('/',
     body('monthly_throughput').isNumeric()
   ],
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const newProduct = await productService.createProduct(req.body);
       res.status(201).json(newProduct);
@@ -86,7 +86,7 @@ productRoutes.put('/:id',
     body('monthly_throughput').isNumeric().optional()
   ],
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const updatedProduct = await productService.updateProduct(req.params.id, req.body);
       if (!updatedProduct) {
@@ -103,7 +103,7 @@ productRoutes.put('/:id',
 productRoutes.delete('/:id',
   param('id').isString().notEmpty(),
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await productService.deleteProduct(req.params.id);
       if (!result) {
@@ -117,7 +117,7 @@ productRoutes.delete('/:id',
 );
 
 // GET /products/categories - Get all product categories
-productRoutes.get('/categories', async (req, res, next) => {
+productRoutes.get('/categories', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const categories = await productService.getAllCategories();
     res.json(categories);
@@ -133,7 +133,7 @@ productRoutes.post('/categories',
     body('description').isString().optional()
   ],
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const newCategory = await productService.createCategory(req.body);
       res.status(201).json(newCategory);
@@ -151,7 +151,7 @@ productRoutes.put('/categories/:id',
     body('description').isString().optional()
   ],
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const updatedCategory = await productService.updateCategory(req.params.id, req.body);
       if (!updatedCategory) {
@@ -168,7 +168,7 @@ productRoutes.put('/categories/:id',
 productRoutes.delete('/categories/:id',
   param('id').isString().notEmpty(),
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await productService.deleteCategory(req.params.id);
       if (!result) {
@@ -188,7 +188,7 @@ productRoutes.post('/classify',
     body('params').isObject().optional()
   ],
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { method, params } = req.body;
       const result = await productService.classifyProducts(method, params);
@@ -204,13 +204,13 @@ productRoutes.post('/import',
   upload.single('file'),
   query('format').isIn(['csv', 'excel']),
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: 'No file uploaded' });
       }
-      
-      const format = req.query.format as string;
+
+      const format = (req.query.format as 'csv' | 'excel');
       const result = await productService.importProducts(req.file.buffer, format);
       res.json(result);
     } catch (error) {
@@ -223,11 +223,11 @@ productRoutes.post('/import',
 productRoutes.get('/export',
   query('format').isIn(['csv', 'excel']),
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const format = req.query.format as string;
+      const format = req.query.format as 'csv' | 'excel';
       const { data, filename } = await productService.exportProducts(format);
-      
+
       res.setHeader('Content-Type', format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
       res.setHeader('Content-Disposition', `attachment; filename=${filename}`);
       res.send(data);
