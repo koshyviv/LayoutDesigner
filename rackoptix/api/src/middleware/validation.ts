@@ -20,16 +20,17 @@ import { logger } from '../utils/logger';
  */
 export function validateRequest(req: Request, res: Response, next: NextFunction): void {
   const errors = validationResult(req);
-  
+
   if (!errors.isEmpty()) {
     logger.debug('Validation errors:', errors.array());
-    
-    return res.status(400).json({
+
+    res.status(400).json({
       status: 'error',
       message: 'Validation failed',
       errors: errors.array()
     });
+    return;
   }
-  
+
   next();
 }
