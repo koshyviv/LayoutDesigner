@@ -6,7 +6,7 @@
 
 import axios from 'axios';
 import { v4 as uuidv4 } from 'uuid';
-import * as csv from 'csv-parser';
+import csvParser from 'csv-parser';
 import * as XLSX from 'xlsx';
 import { Readable } from 'stream';
 import { logger } from '../utils/logger';
@@ -337,17 +337,17 @@ export async function importProducts(
     
     if (format === 'csv') {
       // Parse CSV
-      const results: any[] = [];
+      const results: Record<string, string>[] = [];
       const stream = Readable.from(fileBuffer);
-      
+
       await new Promise<void>((resolve, reject) => {
         stream
-          .pipe(csv())
-          .on('data', (data) => results.push(data))
+          .pipe(csvParser())
+          .on('data', (data: Record<string, string>) => results.push(data))
           .on('end', () => resolve())
-          .on('error', (error) => reject(error));
+          .on('error', (error: Error) => reject(error));
       });
-      
+
       // Convert to products
       importedProducts = results.map(row => ({
         id: `product-${uuidv4()}`,
@@ -361,29 +361,29 @@ export async function importProducts(
         velocity_class: (row.velocity_class || 'C') as 'A' | 'B' | 'C',
         storage_method: (row.storage_method || 'pallet') as 'pallet' | 'case' | 'tote' | 'each',
         stackable: row.stackable === 'true' || row.stackable === '1',
-        monthly_throughput: parseInt(row.monthly_throughput) || 0
+        monthly_throughput: parseInt(row.monthly_throughput, 10) || 0
       }));
     } else if (format === 'excel') {
       // Parse Excel
       const workbook = XLSX.read(fileBuffer);
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const rows = XLSX.utils.sheet_to_json(worksheet);
-      
+      const rows = XLSX.utils.sheet_to_json<Record<string, unknown>>(worksheet);
+
       // Convert to products
-      importedProducts = rows.map((row: any) => ({
+      importedProducts = rows.map((row) => ({
         id: `product-${uuidv4()}`,
-        sku: row.sku || '',
-        name: row.name || '',
-        description: row.description || '',
-        length: parseFloat(row.length) || 0,
-        width: parseFloat(row.width) || 0,
-        height: parseFloat(row.height) || 0,
-        weight: parseFloat(row.weight) || 0,
-        velocity_class: (row.velocity_class || 'C') as 'A' | 'B' | 'C',
-        storage_method: (row.storage_method || 'pallet') as 'pallet' | 'case' | 'tote' | 'each',
+        sku: (row.sku as string) || '',
+        name: (row.name as string) || '',
+        description: (row.description as string) || '',
+        length: parseFloat(String(row.length)) || 0,
+        width: parseFloat(String(row.width)) || 0,
+        height: parseFloat(String(row.height)) || 0,
+        weight: parseFloat(String(row.weight)) || 0,
+        velocity_class: ((row.velocity_class as string) || 'C') as 'A' | 'B' | 'C',
+        storage_method: ((row.storage_method as string) || 'pallet') as 'pallet' | 'case' | 'tote' | 'each',
         stackable: row.stackable === true || row.stackable === 1,
-        monthly_throughput: parseInt(row.monthly_throughput) || 0
+        monthly_throughput: parseInt(String(row.monthly_throughput), 10) || 0
       }));
     }
     

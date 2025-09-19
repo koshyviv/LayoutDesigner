@@ -2,7 +2,7 @@
  * Equipment routes for the RackOptix API.
  */
 
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { body, param, query } from 'express-validator';
 import { validateRequest } from '../middleware/validation';
 import * as equipmentService from '../services/equipment.service';
@@ -11,7 +11,7 @@ import * as equipmentService from '../services/equipment.service';
 const equipmentRoutes = Router();
 
 // GET /equipment - Get all equipment
-equipmentRoutes.get('/', async (req, res, next) => {
+equipmentRoutes.get('/', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const equipment = await equipmentService.getAllEquipment();
     res.json(equipment);
@@ -24,7 +24,7 @@ equipmentRoutes.get('/', async (req, res, next) => {
 equipmentRoutes.get('/:id', 
   param('id').isString().notEmpty(),
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const equipment = await equipmentService.getEquipmentById(req.params.id);
       if (!equipment) {
@@ -50,7 +50,7 @@ equipmentRoutes.post('/',
     body('specifications').isObject().optional()
   ],
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const newEquipment = await equipmentService.createEquipment(req.body);
       res.status(201).json(newEquipment);
@@ -74,7 +74,7 @@ equipmentRoutes.put('/:id',
     body('specifications').isObject().optional()
   ],
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const updatedEquipment = await equipmentService.updateEquipment(req.params.id, req.body);
       if (!updatedEquipment) {
@@ -91,7 +91,7 @@ equipmentRoutes.put('/:id',
 equipmentRoutes.delete('/:id',
   param('id').isString().notEmpty(),
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await equipmentService.deleteEquipment(req.params.id);
       if (!result) {
@@ -105,7 +105,7 @@ equipmentRoutes.delete('/:id',
 );
 
 // GET /equipment/types - Get all equipment types
-equipmentRoutes.get('/types', async (req, res, next) => {
+equipmentRoutes.get('/types', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const types = await equipmentService.getAllEquipmentTypes();
     res.json(types);
@@ -118,7 +118,7 @@ equipmentRoutes.get('/types', async (req, res, next) => {
 equipmentRoutes.get('/types/:id', 
   param('id').isString().notEmpty(),
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const type = await equipmentService.getEquipmentTypeById(req.params.id);
       if (!type) {
@@ -138,7 +138,7 @@ equipmentRoutes.post('/types',
     body('description').isString().optional()
   ],
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const newType = await equipmentService.createEquipmentType(req.body);
       res.status(201).json(newType);
@@ -156,7 +156,7 @@ equipmentRoutes.put('/types/:id',
     body('description').isString().optional()
   ],
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const updatedType = await equipmentService.updateEquipmentType(req.params.id, req.body);
       if (!updatedType) {
@@ -173,7 +173,7 @@ equipmentRoutes.put('/types/:id',
 equipmentRoutes.delete('/types/:id',
   param('id').isString().notEmpty(),
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const result = await equipmentService.deleteEquipmentType(req.params.id);
       if (!result) {
@@ -193,7 +193,7 @@ equipmentRoutes.get('/:id/compatibility/:rackId',
     param('rackId').isString().notEmpty()
   ],
   validateRequest,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id, rackId } = req.params;
       const result = await equipmentService.checkRackCompatibility(id, rackId);
